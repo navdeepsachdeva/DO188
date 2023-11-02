@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: jesse-pod
+spec:
+  containers:
+  - image: registry.access.redhat.com/ubi8/httpd-24
+    name: frontend
+    ports:
+    - containerPort: 8080
+  - image: registry.access.redhat.com/rhscl/mysql-80-rhel7
+    name: backend
+    ports:
+    - containerPort: 3306
+    env:
+    - name: MYSQL_USER
+      value: dan
+    - name: MYSQL_DATABASE
+      value: bank
+    - name: MYSQL_PASSWORD
+      value: mypa55
+    - name: MYSQL_ROOT_PASSWORD
+      value: r00tpa55

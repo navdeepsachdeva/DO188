@@ -1,0 +1,32 @@
+services:
+  first:
+    name: frontend
+    image: quay.io/navdeep_sachdeva/custom:1.0
+    ports:
+      - 1111:8080
+    networks:
+      - david-network
+    volumes:
+      - /home/student/mycompose/webdata:/var/www/html:Z
+
+  second:
+    name: backend
+    image: registry.access.redhat.com/rhscl/mysql-80-rhel7
+    ports:
+      - 3333:3306
+    networks:
+      - david-network
+    environment:
+      MYSQL_USER: amir
+      MYSQL_DATABASE: bank
+      MYSQL_PASSWORD: mypa55
+      MYSQL_ROOT_PASSWORD: r00tpa55
+    volumes:
+      - jeroen-vol:/var/lib/mysql/data
+      - ./dbscripts/db.sql:/tmp/db.sql:Z
+
+volumes:
+  jeroen-vol: {}
+
+networks:
+  david-network: {}
