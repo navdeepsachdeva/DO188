@@ -1,0 +1,148 @@
+
+
+Good Morning
+
+ Welcome to DO188 Class: Red Hat OpenShift Development I: Introduction to Containers with Podman
+ 
+
+
+ 
+ ## Authentication of registry ##
+ ls $XDG_RUNTIME_DIR/containers/auth.json
+ 
+ ## Registry COnfigurations ##
+ sudo vim  /etc/containers/registries.conf
+ 
+ 
+ ## Difference Podman vs Skopeo ##
+ Podman inspect only images which are pulled/present on local system
+ Skopeo inspect image on website/registry itself
+
+podman cp nginx:/etc/nginx/nginx.conf nginx.conf
+
+podman network connect example-net my-container
+cat ${XDG_RUNTIME_DIR}/containers/auth.json
+
+
+
+Dockerfile/Containerfile
+
+		Add								copy 	
+1.		copy from working directory			copy from working directory
+		to image folder					to image folder
+2.		Download from internet				NA 
+		and put in image
+3.		tar file extract and copy contents		copy tar file as it is to image
+		to Image
+
+
+
+sudo touch /etc/{subuid,subgid}
+sudo usermod --add-subuids 100000-165535 \
+--add-subgids 100000-165535 student
+
+podman system migrate
+
+
+
+podman run --rm --network cities registry.ocp4.example.com:8443/ubi8/ubi-minimal:8.5 curl -s http://times-app:8080/times/BKK && echo
+
+podman volume create VOLUME_NAME
+
+
+# First stage
+FROM registry.access.redhat.com/ubi8/nodejs-14:1 as builder
+COPY ./ /opt/app-root/src/
+RUN npm install
+RUN npm run build
+# Second stage
+FROM registry.access.redhat.com/ubi8/nodejs-14-minimal:1
+COPY --from=builder /opt/app-root/src/ /opt/app-root/src/
+EXPOSE 8080
+CMD node dist/index.js
+
+
+
+
+You can also create Containerfiles that do not use chained commands, and configure Podman
+to squash the layers. Use the --squash option to squash layers declared in the Containerfile.
+Alternatively, use the --squash-all option to also squash the layers from the parent image.
+
+
+
+
+Podman maps users inside of the container to unprivileged users on the host system by using
+subordinate ID ranges. Podman defines the allowed ID ranges in the /etc/subuid and /etc/
+subgid files.
+
+The /etc/subuid and /etc/subgid files must exist before you define the
+subordinate ID ranges with the usermod command. After you define the ranges,
+you must execute the podman system migrate for the new subordinate ID
+ranges to take effect.
+
+Similarly, rootless containers cannot use the ping utility by default. This is because the ping
+utility requires elevated privileges to establish raw sockets, which is an action that requires the
+cap_net_raw privilege.
+To solve such a requirement, verify whether you can grant the privilege outside of using
+the root user. For example, you can specify a user range for the ping utility by using the
+net.ipv4.ping_group_range kernel parameter:
+[user@host ~] $ sudo sysctl -w "net.ipv4.ping_group_range=0 2000000"
+
+
+Use -v volume_name:/path/in/container to refer to a volume.
+Alternatively, you can use the --mount parameter with the following syntax:
+--mount type=TYPE,source=/path/on/host,destination=/path/in/container
+
+
+
+
+podman run -p 8080:8080 --volume /www:/var/www/html:ro \
+registry.access.redhat.com/ubi8/httpd-24:latest
+
+
+
+podman volume inspect http-data
+podman run -p 8080:8080 --volume http-data:/var/www/html \
+registry.access.redhat.com/ubi8/httpd-24:latest
+
+
+podman volume import http_data web_data.tar.gz
+podman volume export http_data --output web_data.tar.gz
+
+############# Storing Data with a tmpfs Mount ###########
+podman run -e POSTGRESQL_ADMIN_PASSWORD=redhat --network lab-net \
+--mount type=tmpfs,tmpfs-size=512M,destination=/var/lib/pgsql/data \
+registry.redhat.io/rhel9/postgresql-13:1
+
+
+podman unshare ls -ln --directory ~/www
+podman unshare chgrp -R 994 ~/www
+podman unshare ls -ln --directory ~/www
+
+
+podman generate kube man page
+podman generate kube container > pod.yml
+podman play kube pod.yaml
+
+pip3 install podman-compose --user
+
+
+
+oc expose pod backend-app \
+--port=8080 \
+--targetPort=8080 \
+--name=backend-app \
+--dry-run=client -o yaml
+
+sudo nsenter -t 2809 -n ss -pant
+
+
+
+ oc create deployment mycustom --image=registry.access.redhat.com/ubi8/httpd-24 --port=8080 --dry-run=client -o yaml > mycustom-deployment.yml
+ oc expose service rahaf  --dry-run=client -o yaml >myroute.yml
+  oc new-app --name=front registry.access.redhat.com/ubi8/httpd-24 --namespace neoleap 
+oc scale --replicas=6 deployment/front
+ oc expose deployment custom --dry-run=client -o yaml
+ 
+ oc expose service custom --dry-run=client -o yaml
+oc expose pod rahaf --dry-run=client -o yaml > myservice.yml
